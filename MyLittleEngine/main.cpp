@@ -107,8 +107,8 @@ int WinMain(
 	Renderer renderdx12 = Renderer(std::make_shared<HWND>(hWndDX12), hinstance, std::make_shared<GlobalManager>(globalManager));
 	Renderer rendervulkan = Renderer(std::make_shared<HWND>(hWndVulkan), hinstance, std::make_shared<GlobalManager>(globalManager));
 	//Setup DX12 Thread and Vulkan Thread and begin initialization.
-	std::thread dx12Thread(&Renderer::initialize, &renderdx12, RENDERAPI::DX12, 960, 480);
-	std::thread vulkanThread(&Renderer::initialize, &rendervulkan, RENDERAPI::VULKAN, 960, 480);
+	std::thread dx12Thread(&Renderer::initialize, &renderdx12, RENDERAPI::DX12, 600, 600);
+	std::thread vulkanThread(&Renderer::initialize, &rendervulkan, RENDERAPI::VULKAN, 600, 600);
 	
 	//Wait for threads to finish initialization.
 	dx12Thread.join();

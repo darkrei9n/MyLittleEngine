@@ -18,8 +18,6 @@ struct ViewProjection
 
 class Camera
 {
-
-	
 	Vector3 position;
 	Vector3 zaxis;
 	Vector3 yaxis;
@@ -36,25 +34,24 @@ public:
         yaxis = Vector3::vCross(zaxis, xaxis);
 
         float ratio = (float)width / (float)height;
-        float fov_rad = 45 * 2.0f * 3.14159 / 360.0f;
-        float focal_length = 1.0f / std::tan(fov_rad / 2.0f);
+        float f = 1.0f / std::tan((45) * 3.14159 / 180.0f);
 
-        float x = focal_length / ratio;
-        float y = -focal_length;
-        float z = clipFar / (clipFar - clipClose);
-        float w = -(clipFar * clipClose) / (clipFar - clipClose);
+        float x = f / ratio;
+        float y = -f;
+        float z = clipFar / (clipClose - clipFar);
+        float w = (clipClose * clipFar) / (clipClose - clipFar);
 
         viewProj.projMatrix = Matrix44(
             Vector4(x, 0, 0, 0),
             Vector4(0, y, 0, 0),
-            Vector4(0, 0, z, w),
-            Vector4(0, 0, -1, 0)
+            Vector4(0, 0, z, -1.0f),
+            Vector4(0, 0, w, 0)
         );
 
         viewProj.viewMatrix = Matrix44(
-            Vector4(xaxis.x, -yaxis.x, -zaxis.x, 0),
-            Vector4(xaxis.y, -yaxis.y, -zaxis.y, 0),
-            Vector4(xaxis.z, -yaxis.z, -zaxis.z, 0),
+            Vector4(xaxis.x, yaxis.x, -zaxis.x, 0),
+            Vector4(xaxis.y, yaxis.y, -zaxis.y, 0),
+            Vector4(xaxis.z, yaxis.z, -zaxis.z, 0),
             Vector4(-Vector3::vDot(xaxis, position), -Vector3::vDot(yaxis, position), -Vector3::vDot(zaxis, position), 1)
         );
     }

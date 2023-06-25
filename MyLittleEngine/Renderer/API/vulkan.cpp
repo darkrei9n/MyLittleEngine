@@ -26,7 +26,7 @@ void VulkanRender::InitAPI(int width, int height)
 	
 	buildPipeline("triangle test");
 
-	camera = new Camera(Vector3(1, 0, 15), Vector3(0, 0, 0), Vector3(0, 1, 0), swapChainExtent.width, swapChainExtent.height, 0.1f, 100);
+	camera = new Camera(Vector3(2, 0, 1), Vector3(0, 0, 0), Vector3(0, 1, 0), swapChainExtent.width, swapChainExtent.height, 0.1f, 100);
 
 }
 void VulkanRender::Render()
