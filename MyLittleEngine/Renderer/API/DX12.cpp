@@ -25,7 +25,7 @@ void DX12Render::InitAPI(int width, int height)
 
 	hr = D3D12CreateDevice(
 		hardwareAdapter.Get(),
-		D3D_FEATURE_LEVEL_11_0,
+		D3D_FEATURE_LEVEL_12_0,
 		IID_PPV_ARGS(&m_device)
 	);
 
@@ -196,8 +196,8 @@ void DX12Render::Update()
 
 void DX12Render::PopulateCommandList()
 {
-	/*
-	m_commandAllocator->Reset();
+	
+	/*m_commandAllocator->Reset();
 	m_commandList->Reset(m_commandAllocator.Get(), m_pipelineState.Get());
 
 	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));

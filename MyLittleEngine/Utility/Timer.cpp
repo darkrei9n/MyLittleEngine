@@ -1,8 +1,10 @@
 #include "Headers/Timer.h"
+#include "Windows.h"
+
 
 Timer::Timer() : secondsPerCount(0.0), deltaTime(-1.0), baseTime(0), pauseTime(0), prevTime(0), currTime(0), stopped(false)
 {
-	long long secondsCount;
+	_int64 secondsCount;
 	QueryPerformanceCounter((LARGE_INTEGER*)&secondsCount);
 	secondsPerCount = 1 / (double)secondsCount;
 }
@@ -14,7 +16,7 @@ void Timer::tick()
 		deltaTime = 0;
 		return;
 	}
-	long long curr;
+	_int64 curr;
 	QueryPerformanceCounter((LARGE_INTEGER*)&curr);
 	currTime = curr;
 
@@ -35,7 +37,7 @@ double Timer::getDelta()
 
 void Timer::reset()
 {
-	long long  curr;
+	_int64 curr;
 	QueryPerformanceCounter((LARGE_INTEGER*)&curr);
 	currTime = curr;
 }
@@ -44,7 +46,7 @@ void Timer::pauseTimer()
 {
 	if (!stopped)
 	{
-		long long curr;
+		_int64 curr;
 		QueryPerformanceCounter((LARGE_INTEGER*)&curr);
 
 		stopTime = curr;
@@ -58,7 +60,6 @@ void Timer::startTimer()
 {
 	if (stopped)
 	{
-		
 		stopped = false;
 	}
 	

@@ -1,24 +1,36 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include <thread>
-#include "Utility/Headers/Timer.h"
 #include "Renderer/Headers/Renderer.h"
-#include "Resource Management/Headers/ResourceManager.h"
 #include <string>
 #include <iostream>
-GlobalManager globalManager;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	GlobalManager *globalManager = &GlobalManager::getInstance();
+
 	switch (msg) 
 	{
 	case WM_CLOSE:
 		PostQuitMessage(68);
 		break;
+	case WM_ACTIVATE: 
+		if (LOWORD(wParam) == WA_INACTIVE)
+		{
+			globalManager->getTimer()->pauseTimer();
+		}
+		else
+		{
+			globalManager->getTimer()->startTimer();
+		}
 	case WM_KEYDOWN:
 		if (wParam == 'D')
 		{
-			SetWindowText(hWnd, "Fack");
+			globalManager->getCamera()->translate(Vector3(0.1f, 0.0f, 0.0f));
+		}
+		if (wParam == 'A')
+		{
+			globalManager->getCamera()->translate(Vector3(-0.1f, 0.0f, 0.0f));
 		}
 		break;
 	}
@@ -36,7 +48,7 @@ int WinMain(
 	GetModuleFileNameW(NULL, buffer, MAX_PATH);
 	std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
 	std::wstring path = std::wstring(buffer).substr(0, pos);
-
+	GlobalManager *globalManager = &GlobalManager::getInstance();
 
 	const auto pClassName = "VulkanDX12 Test";
 	const auto pClassNameDX12 = "My Little Engine Test DX12";
@@ -66,7 +78,7 @@ int WinMain(
 		nullptr,
 		nullptr,
 		hInstance,
-		nullptr);
+		&globalManager);
 
 	HWND hWndDX12 = CreateWindowExA(
 		0,
@@ -99,13 +111,14 @@ int WinMain(
 	BOOL gResult;
 
 	//Start the timer
-	Timer timer;
-	timer.reset();
-	globalManager = GlobalManager();
+	Timer* timer = globalManager->getTimer();
+	
+	SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)&globalManager);
+	
 
 	//Initialize Renderer
-	Renderer renderdx12 = Renderer(std::make_shared<HWND>(hWndDX12), hinstance, std::make_shared<GlobalManager>(globalManager));
-	Renderer rendervulkan = Renderer(std::make_shared<HWND>(hWndVulkan), hinstance, std::make_shared<GlobalManager>(globalManager));
+	Renderer renderdx12 = Renderer(std::make_shared<HWND>(hWndDX12), hinstance);
+	Renderer rendervulkan = Renderer(std::make_shared<HWND>(hWndVulkan), hinstance);
 	//Setup DX12 Thread and Vulkan Thread and begin initialization.
 	std::thread dx12Thread(&Renderer::initialize, &renderdx12, RENDERAPI::DX12, 600, 600);
 	std::thread vulkanThread(&Renderer::initialize, &rendervulkan, RENDERAPI::VULKAN, 600, 600);
@@ -120,7 +133,24 @@ int WinMain(
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 
-		timer.tick();
+		/*if(GetAsyncKeyState('A') & 0x8000)
+		{
+			globalManagerPtr->getCamera()->translate(Vector3(-0.1f, 0.0f, 0.0f));
+		}
+		if(GetAsyncKeyState('D') & 0x8000)
+		{
+			globalManagerPtr->getCamera()->translate(Vector3(0.1f, 0.0f, 0.0f));
+		}*/
+	/*	if(GetAsyncKeyState('W') & 0x8000)
+		{
+			globalManagerPtr->getCamera()->translate(Vector3(0.0f, 0.0f, -0.1f));
+		}
+		if(GetAsyncKeyState('S') & 0x8000)
+		{
+			globalManagerPtr->getCamera()->translate(Vector3(0.0f, 0.0f, 0.1f));
+		}*/
+
+		timer->tick();
 		renderdx12.Render();
 		rendervulkan.Render();
 	}

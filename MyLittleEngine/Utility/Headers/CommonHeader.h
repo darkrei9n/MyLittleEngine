@@ -11,6 +11,3 @@
 #include <memory>
 #include "../../Resource Management/Headers/ResourceManager.h"
 #include "GlobalManager.h"
-
-
-extern GlobalManager globalManager;

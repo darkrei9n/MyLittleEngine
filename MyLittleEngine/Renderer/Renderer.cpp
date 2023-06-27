@@ -12,7 +12,7 @@ int Renderer::initialize(RENDERAPI api, int width, int height)
 		//handle = new DX11Render(hwnd);
 		break;
 	case VULKAN:
-		handle = new VulkanRender(hwnd, hinstance, globalManager);
+		handle = new VulkanRender(hwnd, hinstance);
 		break;
 	default:
 		return -1;

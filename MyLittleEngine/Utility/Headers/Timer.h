@@ -1,15 +1,14 @@
 #pragma once
 
-#include "CommonHeader.h"
+#define _int64 long long int
 
-#if true
 class Timer
 {
-	long long currTime;
-	long long baseTime;
-	long long stopTime;
-	long long prevTime;
-	long long pauseTime;
+	_int64 currTime;
+	_int64 baseTime;
+	_int64 stopTime;
+	_int64 prevTime;
+	_int64 pauseTime;
 
 	double deltaTime;
 	double secondsPerCount;
@@ -22,7 +21,5 @@ public:
 	void reset();
 	void pauseTimer();
 	void startTimer();
+
 };
-
-
-#endif

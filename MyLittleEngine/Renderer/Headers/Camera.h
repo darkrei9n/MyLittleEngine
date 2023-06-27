@@ -22,13 +22,14 @@ class Camera
 	Vector3 zaxis;
 	Vector3 yaxis;
 	Vector3 xaxis;
-
+    void* me;
 public:
 	ViewProjection viewProj;
+    Camera() = default;
     Camera(Vector3 pos, Vector3 target, Vector3 up, int height, int width, float clipClose, float clipFar)
     {
         this->position = pos;
-
+        
         zaxis = Vector3::vNorm(pos - target);
         xaxis = Vector3::vNorm(Vector3::vCross(up, zaxis));
         yaxis = Vector3::vCross(zaxis, xaxis);
@@ -49,11 +50,15 @@ public:
         );
 
         viewProj.viewMatrix = Matrix44(
-            Vector4(xaxis.x, yaxis.x, -zaxis.x, 0),
-            Vector4(xaxis.y, yaxis.y, -zaxis.y, 0),
-            Vector4(xaxis.z, yaxis.z, -zaxis.z, 0),
+            Vector4(xaxis.x, -yaxis.x, -zaxis.x, 0),
+            Vector4(xaxis.y, -yaxis.y, -zaxis.y, 0),
+            Vector4(xaxis.z, -yaxis.z, -zaxis.z, 0),
             Vector4(-Vector3::vDot(xaxis, position), -Vector3::vDot(yaxis, position), -Vector3::vDot(zaxis, position), 1)
         );
+
+        me = this;
     }
 
+    void translate(Vector3 translation);
+    void rotate();
 };

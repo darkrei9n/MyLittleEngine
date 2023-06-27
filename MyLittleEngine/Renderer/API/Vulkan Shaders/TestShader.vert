@@ -16,7 +16,7 @@ layout(location = 0) out vec4 fColor;
 
 void main()
 {
-	gl_Position = pushConstants.projection * pushConstants.view * vPosition;
+	gl_Position = vPosition * pushConstants.projection * pushConstants.view;
 
 	fColor = vColor;
 }

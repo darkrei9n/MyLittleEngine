@@ -92,7 +92,7 @@ class VulkanRender : public APIBase
     //Winda Objects
     WNDInfo wndInfo;
     //Global Object
-    std::shared_ptr<GlobalManager> globalManager;
+    GlobalManager* globalManager;
 
     //Debug stuff. Sigh.....
     #ifdef _DEBUG
@@ -230,10 +230,9 @@ class VulkanRender : public APIBase
     void postRender(VkCommandBuffer &commands, uint32_t &imageIndex);
 public:
 
-	VulkanRender(std::shared_ptr<HWND> hWnd, std::shared_ptr<HINSTANCE> hInstance, std::shared_ptr<GlobalManager> globalManager) {
+	VulkanRender(std::shared_ptr<HWND> hWnd, std::shared_ptr<HINSTANCE> hInstance) {
         wndInfo.hWnd = hWnd;
         wndInfo.hInstance = hInstance;
-        this->globalManager = globalManager;
 	}
 
 	void InitAPI(int width, int height) override;

@@ -7,6 +7,7 @@
 
 void VulkanRender::InitAPI(int width, int height)
 {
+	globalManager = &GlobalManager::getInstance();
 	createInstance();
 	createSurface(); 
 	enumerateDevices();
@@ -26,8 +27,8 @@ void VulkanRender::InitAPI(int width, int height)
 	
 	buildPipeline("triangle test");
 
-	camera = new Camera(Vector3(2, 0, 1), Vector3(0, 0, 0), Vector3(0, 1, 0), swapChainExtent.width, swapChainExtent.height, 0.1f, 100);
-
+	globalManager->setCamera(new Camera(Vector3(0, 0, 1), Vector3(0, 0, 0), Vector3(0, 1, 0), swapChainExtent.width, swapChainExtent.height, 0.000000001f, 10000));
+	camera = globalManager->getCamera();
 }
 void VulkanRender::Render()
 {

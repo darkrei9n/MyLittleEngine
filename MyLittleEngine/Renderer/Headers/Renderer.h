@@ -16,7 +16,7 @@ enum RENDERAPI
 class Renderer
 {
 public:
-	Renderer(std::shared_ptr<HWND> hWnd, std::shared_ptr<HINSTANCE> hInstance, std::shared_ptr<GlobalManager> globalManager)
+	Renderer(std::shared_ptr<HWND> hWnd, std::shared_ptr<HINSTANCE> hInstance)
 	{
 		hwnd = hWnd;
 		hinstance = hInstance;
