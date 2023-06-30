@@ -43,7 +43,7 @@ void VulkanRender::Render()
 	vkCmdBindVertexBuffers(cmd, 0, 1, &allocation.at(allocation.size()-1).buffer, &offset);
 	Matrix44 weTest;
 	vkCmdPushConstants(cmd, pipelines.at(pipelines.size()-1).layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewProjection), &camera->viewProj);
-	vkCmdDraw(cmd, allocation.at(allocation.size()-1).vertexData.size(), 1, 0, 0);
+	vkCmdDraw(cmd, allocation.at(allocation.size()-1).vertices.get()->size(), 1, 0, 0);
 
 	postRender(cmd, imageIndex);
 }
@@ -947,142 +947,43 @@ void VulkanRender::LoadVertexData(const char* path)
 {
 	std::function<void(std::pair<const void*, int64_t>) > vertexFunc;
 
-	vertexFunc = [this](std::pair<const void*, int64_t> filePair)
+	AllocatedBuffer newAlloc;
+	newAlloc.vertices = globalManager->getResourceManager()->loadObj(path);
+
+	auto vertexData = newAlloc.vertices.get()->size();
+
+	VkBufferCreateInfo bufferCreateInfo = {};
+	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferCreateInfo.size = sizeof(VertexStruct) * vertexData;
+	bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	VmaAllocationCreateInfo allocationCreateInfo = {};
+	allocationCreateInfo.flags = 0;
+	allocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+	allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+	allocationCreateInfo.preferredFlags = 0;
+	allocationCreateInfo.memoryTypeBits = 0;
+	allocationCreateInfo.pool = nullptr;
+	allocationCreateInfo.pUserData = nullptr;
+
+
+
+	VkResult result = vmaCreateBuffer(vkInfo.allocator, &bufferCreateInfo, &allocationCreateInfo, &newAlloc.buffer, &newAlloc.allocation, nullptr);
+	if (result != VK_SUCCESS)
 	{
-		AllocatedBuffer newAlloc = {};
-		char* dataPointer = (char*)filePair.first;
-		int offset = sizeof(char);
-		int totalOffset = 0;
-		char* endPointer = (char*)filePair.first + filePair.second;
+		MessageBox(NULL, "Failed to create vertex buffer!", "Error", MB_OK);
+		exit(-1);
+	}
 
-		int textureCount = 0;
-		int normalCount = 0;
-		//We load an obj here for now...
-		while (totalOffset < filePair.second)
-		{
-			char* secondPointer = dataPointer + offset;
-			if ((*dataPointer == 'v') && *secondPointer == ' ')
-			{
-				dataPointer += 2;
-				std::string x = "";
-				std::string y = "";
-				std::string z = "";
-				while (*dataPointer != ' ')
-				{
-					x += *dataPointer;
-					dataPointer += offset;
-				}
-				dataPointer += offset;
-				while (*dataPointer != ' ')
-				{
-					y += *dataPointer;
-					dataPointer += offset;
-				}
-				dataPointer += offset;
-				while (*dataPointer != '\n' && totalOffset < filePair.second)
-				{
-					z += *dataPointer;
-					dataPointer += offset;
-					totalOffset = dataPointer - (char*)filePair.first;
-				}
-				//Vertex Struct declares in this order: Vertices, Normal, Color, UV
-				VertexStruct newVertex = {
-				Vector4(std::stof(x), std::stof(y), std::stof(z), 1.0f),
-				Vector4(0.0f, 0.0f, 0.0f, 0.0f),
-				Vector4(1.0f, 0.0f, 0.0f, 0.0f),
-				Vector2(0.0f, 0.0f)
-				};
-				newAlloc.vertexData.push_back(newVertex);
-			} 
-			else if ((*dataPointer == 'v') && *secondPointer == 'n') 
-			{
-				dataPointer += 3;
-				std::string x = "";
-				std::string y = "";
-				std::string z = "";
-				while (*dataPointer != ' ')
-				{
-					x += *dataPointer;
-					dataPointer += offset;
-				}
-				dataPointer += offset;
-				while (*dataPointer != ' ')
-				{
-					y += *dataPointer;
-					dataPointer += offset;
-				}
-				dataPointer += offset;
-				while (*dataPointer != '\n' && totalOffset < filePair.second)
-				{
-					z += *dataPointer;
-					dataPointer += offset;
-					totalOffset = dataPointer - (char*)filePair.first;
-				}
-				newAlloc.vertexData[normalCount].normals = Vector4(std::stof(x), std::stof(y), std::stof(z), 0.0f);
-				normalCount++;
+	void* data;
+	vmaMapMemory(vkInfo.allocator, newAlloc.allocation, &data);
+	memcpy(data, newAlloc.vertices.get(), vertexData * sizeof(VertexStruct));
+	vmaUnmapMemory(vkInfo.allocator, newAlloc.allocation);
 
-			} 
-			else if ((*dataPointer == 'v') && *secondPointer == 't') 
-			{
-				dataPointer += 3;
-				std::string x = "";
-				std::string y = "";
-				while (*dataPointer != ' ')
-				{
-					x += *dataPointer;
-					dataPointer += offset;
-				}
-				dataPointer += offset;
-				while (*dataPointer != '\n' && totalOffset < filePair.second)
-				{
-					y += *dataPointer;
-					dataPointer += offset;
-					totalOffset = dataPointer - (char*)filePair.first;
-				}
-				newAlloc.vertexData[textureCount].uv = Vector2(std::stof(x), std::stof(y));
-				textureCount++;
-			}
-			dataPointer += offset;
-			totalOffset = dataPointer - (char*)filePair.first;
-		}
-	
 
-		VkBufferCreateInfo bufferCreateInfo = {};
-		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		//Need to double check this. Potentialy that size is less and starting location is different
-		bufferCreateInfo.size = sizeof(VertexStruct) * newAlloc.vertexData.size();
-		bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-		VmaAllocationCreateInfo allocationCreateInfo = {};
-		allocationCreateInfo.flags = 0;
-		allocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-		allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-		allocationCreateInfo.preferredFlags = 0;
-		allocationCreateInfo.memoryTypeBits = 0;
-		allocationCreateInfo.pool = nullptr;
-		allocationCreateInfo.pUserData = nullptr;
-
-		
-
-		VkResult result = vmaCreateBuffer(vkInfo.allocator, &bufferCreateInfo, &allocationCreateInfo, &newAlloc.buffer, &newAlloc.allocation, nullptr);
-		if (result != VK_SUCCESS)
-		{
-			MessageBox(NULL, "Failed to create vertex buffer!", "Error", MB_OK);
-			exit(-1);
-		}
-
-		void* data;
-		vmaMapMemory(vkInfo.allocator, newAlloc.allocation, &data);
-		memcpy(data, newAlloc.vertexData.data(), newAlloc.vertexData.size() * sizeof(VertexStruct));
-		vmaUnmapMemory(vkInfo.allocator, newAlloc.allocation);
-		
-	
-		allocation.push_back(newAlloc);
-		return;
-	};
-
-	globalManager->getResourceManager()->loadFile(path, vertexFunc);
+	allocation.push_back(newAlloc);
+	return;
 }
 
 void VulkanRender::buildPipeline(std::string name)

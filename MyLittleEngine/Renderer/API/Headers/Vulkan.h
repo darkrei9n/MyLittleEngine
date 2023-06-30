@@ -79,7 +79,7 @@ struct AllocatedBuffer {
     VkImage image;
 	VmaAllocation allocation;
     Matrix44 modelMatrix;
-    std::vector<VertexStruct> vertexData;
+    std::shared_ptr<std::vector<VertexStruct>> vertices;
     std::vector<uint32_t> indices;
 };
 

@@ -78,7 +78,7 @@ int WinMain(
 		nullptr,
 		nullptr,
 		hInstance,
-		&globalManager);
+		nullptr);
 
 	HWND hWndDX12 = CreateWindowExA(
 		0,
@@ -149,6 +149,8 @@ int WinMain(
 		{
 			globalManagerPtr->getCamera()->translate(Vector3(0.0f, 0.0f, 0.1f));
 		}*/
+
+		renderdx12.Update();
 
 		timer->tick();
 		renderdx12.Render();

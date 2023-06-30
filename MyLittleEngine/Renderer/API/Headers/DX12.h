@@ -15,7 +15,11 @@ using namespace Microsoft::WRL;
 
 class DX12Render: public APIBase
 {
+    GlobalManager globalManager;
     static const UINT FrameCount = 3;
+    //Cause Im lazy
+    int mHeight;
+    int mWidth;
     //Initialization Objects
     ComPtr<ID3D12Device> m_device;
     ComPtr<IDXGIFactory7> factory;
@@ -47,10 +51,18 @@ class DX12Render: public APIBase
     ComPtr<ID3D12Fence> m_fence;
     UINT64 m_fenceValue;
 
+    //Ol Depth Stencil
+    ComPtr<ID3D12Resource> m_depthStencil;
+    ComPtr<ID3D12Resource> m_depthStencilBuffer;
+
     std::shared_ptr<HWND> hWnd;
     std::shared_ptr<HINSTANCE> hInstance;
 
     void GetHardwareAdapter(IDXGIFactory2* pFactory, IDXGIAdapter1** ppAdapter);
+    void CreateRenderTarget();
+    void CreateDepthStencil();
+    void CreateCommandList();
+    void CreateSwapChain(int width, int height);
 public:
 
     DX12Render(std::shared_ptr<HWND> hWnd, std::shared_ptr<HINSTANCE> hInstance)
@@ -61,6 +73,7 @@ public:
 	~DX12Render() = default;
 
 	void InitAPI(int width, int height) override;
+    void LoadAssetsFromFile(ASSETTYPE type, char* path) override;
     void Render() override;
     void Update() override;
     void End() override;

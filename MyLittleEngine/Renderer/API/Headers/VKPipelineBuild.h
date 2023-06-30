@@ -13,15 +13,6 @@ typedef struct {
 	std::string name;
 } Pipelines;
 
-typedef struct
-{
-	Vector4 vertices;
-	Vector4 normals;
-	Vector4 colors;
-	Vector2 uv;
-
-} VertexStruct;
-
 enum shader {
 	VERTEX_SHADER = 0,
 	FRAGMENT_SHADER = 1
